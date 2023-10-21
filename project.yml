@@ -1,0 +1,64 @@
+title: "Detecting drug names in online comments (Named Entity Recognition)"
+description: "This project uses [Prodigy](https://prodi.gy) to bootstrap an NER model to detect drug names in [Reddit comments](https://files.pushshift.io/reddit/comments/)."
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  config: "config.cfg"
+  name: "ner_brands"
+  version: "0.0.0"
+  train: "train"
+  dev: "test"
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["data", "models", "corpus"]
+
+# Workflows are sequences of commands (see below) executed in order. You can
+# run them via "spacy project run [workflow]". If a commands's inputs/outputs
+# haven't changed, it won't be re-run.
+workflows:
+  all:
+    # - download
+    - train
+    - evaluate
+
+# Project commands, specified in a style similar to CI config files (e.g. Azure
+# pipelines). The name is the command name that lets you trigger the command
+# via "spacy project run [command] [path]". The help message is optional and
+# shown when executing "spacy project run [optional command] [path] --help".
+commands:
+  - name: download
+    help: "Download a spaCy model with pretrained vectors"
+    script:
+      - "python -m spacy download en_core_web_md"
+
+  - name: "train"
+    help: "Train a named entity recognition model"
+    script:
+      - "python -m spacy train ${vars.config} --output models/ --paths.train corpus/${vars.train}.spacy --paths.dev corpus/${vars.dev}.spacy --paths.vectors en_core_web_md"
+    deps:
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
+    outputs:
+      - "models/model-best"
+
+  - name: "evaluate"
+    help: "Evaluate the model and export metrics"
+    script:
+      - "python -m spacy evaluate models/model-best corpus/${vars.dev}.spacy --output models/metrics.json"
+    deps:
+      - "corpus/${vars.dev}.spacy"
+      - "models/model-best"
+    outputs:
+      - "models/metrics.json"
+
+  - name: package
+    help: "Package the trained model so it can be installed"
+    script:
+      - "python -m spacy package models/model-best packages --name ${vars.name} --version ${vars.version} --force"
+    deps:
+      - "models/model-best"
+    outputs_no_cache:
+      - "packages/en_${vars.name}-${vars.version}/dist/en_${vars.name}-${vars.version}.tar.gz"
+
+# python -m spacy train config.cfg --output models/ --paths.train corpus/train.spacy --paths.dev corpus/test.spacy
+python -m spacy train config_transformer.cfg --output models/ --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy
