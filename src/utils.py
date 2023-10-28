@@ -1,6 +1,6 @@
 # helper functions
 from typing import List, Dict, Tuple
-import re
+import re, pickle, json
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
@@ -25,6 +25,25 @@ stop_words.update(additional_stop_words)
 clear_output()
 
 
+### Load operation data ###
+path1 = "data/brand_belong_category_dict.json"
+path2 = "data/product_upper_category_dict.json"
+path3 = "data/offered_brands.pkl"
+path4 = "data/offer_retailer.csv"
+
+with open(path1, 'r') as f:
+    brand_belong_category_dict = json.load(f)
+
+with open(path2, 'rb') as f:
+    category_dict = json.load(f)
+
+with open(path3, 'rb') as f:
+    offered_brands = pickle.load(f)
+
+df_offers_brand_retailer = pd.read_csv(path4)
+example_search = "Simply Spiked Lemonade 12 pack at Walmart"
+
+### Functions ###
 def single_text_cleaner(text: str, remove_stopwords: bool=False, upper_case: bool = False, remove_punctuation: bool=True) -> str:
     """Clean one single text input. By default it will convert text to lower case"""
     if upper_case:
@@ -166,7 +185,7 @@ class CatchErros(Exception):
         pass
 
 
-def offer_finder_by_category(search_input: str, search_category_tuple: Tuple, category_dict: Dict, offered_brands: List, 
+def offer_finder_by_category(search_input: str, search_category_tuple: Tuple, category_dict: Dict, offers: pd.DataFrame, offered_brands: List, 
                              brand_belong_category_dict: Dict, score: str, threshold: float = 0.0) -> pd.DataFrame:
     """Find offers based on a category identified from search input.
     Args:
@@ -251,7 +270,9 @@ def offer_finder_by_entity(search_input: str, entities: Tuple, offers_data: pd.D
         return None
 
 
-def main(search_input: str, offers: pd.DataFrame, category_dict: Dict, brand_belong_category_dict: Dict, score: str, score_threshold: float = 0.0):
+def search_offers(search_input: str=example_search, offers: pd.DataFrame=df_offers_brand_retailer, offer_brands: List=offered_brands,
+                  category_dict: Dict=category_dict, brand_belong_category_dict: Dict=brand_belong_category_dict, 
+                  score: str="jaccard", score_threshold: float = 0.0):
     """Main function. Takes in a serach_input and decide whether it can find entities or not. Then excecute the appropriate functions
     Inputs:
     - search_input: a string that a user enters
@@ -273,7 +294,7 @@ def main(search_input: str, offers: pd.DataFrame, category_dict: Dict, brand_bel
        else:
             # we assume people just search one category at a time
             cat_tuple = cat_check # ('Alcohol', 'beer')
-            search_results = offer_finder_by_category(search_input, cat_tuple, category_dict, offers, brand_belong_category_dict, score, score_threshold)
+            search_results = offer_finder_by_category(search_input, cat_tuple, category_dict, offers, offered_brands, brand_belong_category_dict, score, score_threshold)
             return search_results
     else:
         entities = check_ent.ents # entities will be a tuple anyways
@@ -286,6 +307,6 @@ def main(search_input: str, offers: pd.DataFrame, category_dict: Dict, brand_bel
                 raise SearchFailedError('No brand/retailer/category is found. Please try again.')
             else:
                 cat_tuple = cat_check
-                search_results = offer_finder_by_category(search_input, cat_tuple, category_dict, offers, brand_belong_category_dict, score, score_threshold)
+                search_results = offer_finder_by_category(search_input, cat_tuple, category_dict, offers, offered_brands, brand_belong_category_dict, score, score_threshold)
         return search_results
             

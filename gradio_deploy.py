@@ -2,39 +2,23 @@ import gradio as gr
 import pandas as pd
 import numpy as np
 
-import pickle, json
 from src.utils import *
 
 ##### Start #####
 
-# load operation data
-path1 = "data/brand_belong_category_dict.json"
-path2 = "data/product_upper_category_dict.json"
-path3 = "data/offered_brands.pkl"
-path4 = "data/offer_retailer.csv"
-
-with open(path1, 'r') as f:
-    brand_belong_category_dict = json.load(f)
-
-with open(path2, 'rb') as f:
-    category_dict = json.load(f)
-
-with open(path3, 'rb') as f:
-    offered_brands = pickle.load(f)
-
-df_offers_brand_retailer = pd.read_csv(path4)
-
 examples = [
-    ["Simply Spiked Lemonade 12 pack at Walmart"],
-    ["Back to the Roots Garden Soil, 1 cubic foot, at Lowe's Home Improvement"],
-    ["Costco Member subscription"],
-    ["Apple watch coupon at Best Buy"],
-    ["A giraffe at Lincoln Park Zoo"]
+    ["Simply Spiked Lemonade 12 pack at Walmart", "jaccard", 0.1, 0.1],
+    ["Back to the Roots Garden Soil, 1 cubic foot, at Lowe's Home Improvement", "jaccard", 0.1, 0.1],
+    ["Costco Member subscription", "jaccard", 0.1, 0.1],
+    ["Apple watch coupon at Best Buy", "jaccard", 0.1, 0.1],
+    ["A giraffe at Lincoln Park Zoo", "jaccard", 0.1, 0.1]
 ]
 
-def main(sentence: str, score_type: str, threshold_cosine: float, threshold_jaccard: float):
+def main(sentence: str, score_type: str, threshold_cosine: float, threshold_jaccard: float = 0.1):
     threshold = threshold_cosine if score_type == "cosine" else threshold_jaccard    
-    results = search_offers(sentence, df_offers_brand_retailer, category_dict, brand_belong_category_dict, score_type, threshold)
+    results = search_offers(search_input=sentence, 
+                            score=score_type, 
+                            score_threshold=threshold)
     message, processed_results = process_output(results)
     return message, processed_results
 
@@ -45,7 +29,7 @@ def process_output(output):
     else:
         return "We found some great offers!", output
 
-iface = gr.Interface(
+demo = gr.Interface(
     fn=main,
     inputs=[
         gr.Textbox(lines=1, placeholder="Type here..."),
@@ -58,5 +42,6 @@ iface = gr.Interface(
     live=False,
 )
 
+
 if __name__ == "__main__":
-    iface.launch()
+    demo.launch(share=True)
