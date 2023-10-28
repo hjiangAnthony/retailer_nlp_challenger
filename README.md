@@ -19,22 +19,6 @@ I have created a [Huggingface Space](https://huggingface.co/spaces/hjianganthony
 ## Data
 Three CSV files are provided initially: `categories.csv`, `brand_category.csv`, and `offer_retailer.csv`. 
 
-**Deployment**
-I used Gradio as my deployment solution. Other options such as Streamlit and Flask are great to explore. One could not only design web app, but also incorporate the functionality into mobile apps or back-end services. This project takes the approach of building a lightweight web app.
-
-If you want to run the gradio locally, you will need at least the following dependencies:
-```
-spacy
-spacy-transformers
-spacy-huggingface-hub
-pytorch
-gradio
-```
-
-In addition, you need a spaCy model. It can be a blank one or a pre-trained one like `en_core_web_md`. This project will also demonstrate on training and fine-tuning your own spaCy model. You can find my version on [HuggingFace](https://huggingface.co/hjianganthony/en_fetch_ner_spacy_tsf?library=true). 
-
-Next, you can run the [gradio_deploy.py](https://github.com/hjiangAnthony/retailer_nlp_challenger/blob/main/gradio_deploy.py).
-
 ## Methodology
 
 ### Goals
@@ -44,12 +28,18 @@ Next, you can run the [gradio_deploy.py](https://github.com/hjiangAnthony/retail
 - If a user searches for a retailer (ex. Target) the tool should return a list of offers that are relevant to that retailer
 - The tool should also return the score that was used to measure the similarity of the text input with each offer
 ```
-### Model Results
-```
+
+### Model Training and Results
+To train the spaCy model to learn new entities, you can refer to the [spaCy template](https://github.com/explosion/projects) developed by Explosion. You will also be able to write a config file. One thing worth mentioning is that you will need a GPU to run my config file. Otherwise, please choose your configuration carefully.
+
+#### Data Preparing
+spaCy takes the [spaCy binary format](https://spacy.io/api/data-formats). One needs to transform the abovementioned files to labeled files (in my case it is `JSON`) and then convert them to spaCy corpus. Feel free to try other methods.
+
 <div align=center>
 <img width="800" height="400" src="https://github.com/hjiangAnthony/retailer_nlp_challenger/blob/main/images/spacy_ner_demo.png"/>
 </div>
 
+```
 ============================= Training pipeline =============================
 ℹ Pipeline: ['transformer', 'ner']
 ℹ Initial learn rate: 0.0
@@ -78,3 +68,19 @@ E    #       LOSS TRANS...  LOSS NER  ENTS_F  ENTS_P  ENTS_R  SCORE
 2000    4000           0.00     50.48   91.50   90.91   92.11    0.92
 2100    4200           0.00     37.89   91.50   90.91   92.11    0.92
 ```
+
+### Deployment
+I used Gradio as my deployment solution. Other options such as Streamlit and Flask are great to explore. One could not only design web app, but also incorporate the functionality into mobile apps or back-end services. This project takes the approach of building a lightweight web app.
+
+If you want to run the gradio locally, you will need at least the following dependencies:
+```
+spacy
+spacy-transformers
+spacy-huggingface-hub
+pytorch
+gradio
+```
+
+In addition, you need a spaCy model. It can be a blank one or a pre-trained one like `en_core_web_md`. This project will also demonstrate on training and fine-tuning your own spaCy model. You can find my version on [HuggingFace](https://huggingface.co/hjianganthony/en_fetch_ner_spacy_tsf?library=true). 
+
+Next, you can run the [gradio_deploy.py](https://github.com/hjiangAnthony/retailer_nlp_challenger/blob/main/gradio_deploy.py).
