@@ -46,6 +46,10 @@ Next, you can run the [gradio_deploy.py](https://github.com/hjiangAnthony/retail
 ```
 ### Model Results
 ```
+<div align=center>
+<img width="800" height="400" src="https://github.com/hjiangAnthony/retailer_nlp_challenger/blob/main/images/spacy_ner_demo.png"/>
+</div>
+
 ============================= Training pipeline =============================
 ℹ Pipeline: ['transformer', 'ner']
 ℹ Initial learn rate: 0.0
