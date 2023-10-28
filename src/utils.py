@@ -251,7 +251,7 @@ def offer_finder_by_entity(search_input: str, entities: Tuple, offers_data: pd.D
         return None
 
 
-def search_offers(search_input: str, offers: pd.DataFrame, category_dict: Dict, brand_belong_category_dict: Dict, score: str, score_threshold: float = 0.0):
+def main(search_input: str, offers: pd.DataFrame, category_dict: Dict, brand_belong_category_dict: Dict, score: str, score_threshold: float = 0.0):
     """Main function. Takes in a serach_input and decide whether it can find entities or not. Then excecute the appropriate functions
     Inputs:
     - search_input: a string that a user enters
@@ -279,5 +279,13 @@ def search_offers(search_input: str, offers: pd.DataFrame, category_dict: Dict, 
         entities = check_ent.ents # entities will be a tuple anyways
         print(f'Found {len(entities)} entity object(s) in the search input.')
         search_results = offer_finder_by_entity(search_input, entities, offers, score, score_threshold)
+        if search_results is None:
+            print('No offers matched retailer/category is found. Now trying to recommend based on category.')
+            cat_check = find_category(search_input, category_dict)
+            if cat_check is None:
+                raise SearchFailedError('No brand/retailer/category is found. Please try again.')
+            else:
+                cat_tuple = cat_check
+                search_results = offer_finder_by_category(search_input, cat_tuple, category_dict, offers, brand_belong_category_dict, score, score_threshold)
         return search_results
             
