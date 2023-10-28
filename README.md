@@ -36,7 +36,7 @@ To train the spaCy model to learn new entities, you can refer to the [spaCy temp
 spaCy takes the [spaCy binary format](https://spacy.io/api/data-formats). One needs to transform the abovementioned files to labeled files (in my case it is `JSON`) and then convert them to spaCy corpus. Feel free to try other methods.
 
 <div align=center>
-<img width="200" height="400" src="https://github.com/hjiangAnthony/retailer_nlp_challenger/blob/main/images/spacy_ner_demo.png"/>
+<img width="350" height="400" src="https://github.com/hjiangAnthony/retailer_nlp_challenger/blob/main/images/spacy_ner_demo.png"/>
 </div>
 
 ```
